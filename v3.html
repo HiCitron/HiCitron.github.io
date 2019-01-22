@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html >
+<head>
+<meta charset="UTF-8">
+<title>HTML5 paste image to page</title>
+<link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    #container {
+        width: 75%;
+        height: 0px;
+        box-shadow: inset 1px 1px 8px 8px rgba(127,127,127,.4);
+        background: radial-gradient( rgb(0, 191, 255), rgb(0, 137, 183) ) ;
+        position: absolute; top:0; bottom: 0; left: 0;
+        margin: auto;
+        text-align: center;
+
+        overflow: hidden;
+    }
+    #results {
+        width: 25%;
+        position: absolute; top:0; bottom: 0; right: 0;
+        text-align: center;
+        box-shadow: inset 4px 4px 8px 8px rgba(0,0,0,.4);
+        background: linear-gradient( 90deg, rgb(10, 20, 20), rgb(30,60,60) ) ;
+        border-left: 1px solid white;
+    }
+    #bg {
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+    }
+    #frame {
+        position: relative;
+        top: 0;
+        left: 0;
+        border: 2px dashed black;
+        width: 12px;
+        height: 12px;
+    }
+    #container > div#dropzone {
+        width: 80%;
+        margin: auto;
+        margin-top: 100px;
+        padding-bottom: 200px;
+        background-color: rgba(100,220,255,0.15);
+        border: 2px dashed #666666;
+        border-radius: 20px;
+    }
+    #container > div#dropzone > #input {
+        position:absolute;
+        width: 80%;
+        top: 102px;
+        left: 10%;
+        right: 10%;
+        height: 422px;
+        cursor: pointer; 
+        opacity:0;
+    }
+    #container > div#dropzone >span#info {
+        display: inline-block;
+        margin-top: 50px;
+        padding: 8px 3px;
+        font-family: Raleway;
+        font-size: 36px;
+        color: #333333;
+    }
+    #container > div#dropzone > div#droplogo {
+        width: 80px;
+        margin: auto;
+        margin-top: 40px;
+        padding-bottom: 10px;
+    }
+    #container > div#dropzone > div#droplogo > i {
+        border: solid #333333;
+        border-width: 0 8px 8px 0;
+        display: inline-block;
+        padding: 12px;
+        transform: rotate(45deg);
+    }
+    #container > div#dropzone > div#droplogo > div#borderlogo {
+        height: 20px;
+        border-radius: 8px;
+        border: solid 8px #333333;
+        border-top: none;
+    }
+    #results > div#paneltop {
+        width: 100%;
+        height: 30px;
+    }
+    #results > div#paneltop > button {
+        margin: 5px;
+        padding: 5px 8px;
+        font-family: Raleway;
+        border: none;
+        border-radius: 3px;
+        box-shadow: 2px 2px;
+        color: #222222;
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+    }
+    #results > div#paneltop > button#reset {
+        background: linear-gradient( 180deg, #FF9999, #AA5555 );
+        float: right;
+    }
+    #results > div#paneltop > button#save {
+        background: linear-gradient( 180deg, #99CCFF, #5599AA );
+        float: left;
+    }
+    #results > input#caption {
+        width: 45%;
+        height: 30px;
+        margin: 0px auto;
+        margin-top: 20px;
+        font-family: Raleway;
+        font-size: 14px;
+        background: radial-gradient(#448888, #224444);
+        box-shadow: inset 1px 1px 4px 4px rgba(100,100,100,.4);
+        border: 0px solid gray;
+        border-radius: 20px 20px 0px 0px;
+        color: white;
+        text-align: center;
+        outline: none;
+    }
+    ::-webkit-input-placeholder { color: #AAA; }
+    #results > div#preview {
+        width: 60%;
+        height: 140px;
+        background-color: #000;
+        margin: 0px auto;
+        margin-bottom: 40px;
+        border-radius: 5px;
+        box-shadow: inset 1px 1px 4px 4px rgba(100,100,100,.4);
+    }
+    #results > div#data > span {
+        margin-left: 5%;
+        width: 15%;
+        float: left;
+        height: 20px;
+        padding: 10px 0px;
+        margin-bottom: 30px;
+        font-family: Raleway;
+        font-size: 18px;
+        color: #CCCCCC;
+        border: none;
+        border-radius: 5px 0px 0px 5px;
+        background: radial-gradient(#224444, #112222);
+        box-shadow: inset 1px 1px 2px 2px rgba(50,50,50,.4);
+    }
+    #results > div#data > p {
+        width: 60%;
+        float: left;
+        height: 20px;
+        padding: 10px 0px;
+        margin-bottom: 30px;
+        font-family: Consolas;
+        font-size: 18px;
+        color: #CCCCCC;
+        border: none;
+        border-radius: 0px 5px 5px 0px ;
+        background: radial-gradient(#448888, #224444);
+        box-shadow: inset 1px 1px 4px 4px rgba(100,100,100,.4);
+        white-space:pre;
+    }
+    #results > div#data > button {
+        margin-right: 10px;
+        margin-bottom: 30px;
+        float: right;
+        width: 40px;
+        height: 40px;
+        padding-bottom: 3px;
+        border: none;
+        border-radius: 50%;
+        background: linear-gradient(#DDDDDD, #AAAAAA);
+        color: #222222;
+        font-size: 25px;
+        transform: rotate(45deg);
+        box-shadow: 3px 0px rgba(100,100,100,.4);
+    }
+
+/* table styling*/
+    table {
+        margin: 0% 5%;
+        width: 90%;
+        color: white;
+        font-family: Consolas;
+        border-spacing: 0;
+        box-shadow: inset 1px 1px 2px 2px rgba(100,100,100,.4);
+        border: 0px solid white;
+        border-radius: 5px;
+    }
+    table, td, th { box-sizing: border-box; }
+
+    thead {
+        border-bottom: 2px solid #AAAAAA;
+        background: linear-gradient( 0deg, rgba(127,187,230,0.3), rgba(0,50,100,0.3) );
+    }
+    th {
+        color: white;
+        border-right: 1px solid rgba(180,180,180,0.4);
+    }
+    th:last-child { border: 0; }
+    tr > td:first-child { box-shadow: inset 1px 1px 4px 4px rgba(100,100,100,.2); }
+    td {
+        white-space:pre;
+        border-bottom: 1px solid #AAAAAA;
+        border-right: 1px solid rgba(120,120,120,0.4);
+        font-size: 12px;
+    }
+    td:last-child { border-right: none; }
+    tbody > tr { background-color: rgba(150,200,250,0.1); }
+    tbody > tr:nth-child(even) { background-color: rgba(150,200,250,0.3); }
+    tbody {
+        width: 100%;
+        height: 150px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+    td, th {
+      padding: 4px 0px;
+      display: inline-block;
+    }
+    tbody, thead, tr {
+      width: 100%;
+      display: inline-block;
+    }
+    th.special {
+      width: calc( 29% - 0.29*17px + 17px);
+    }
+    td.A {width: 14%;}
+    td.B {width: 29%;} 
+    td.C {width: 43%;}
+    th.A {width: calc(14% - 0.14*17px); }
+    th.B {width: calc(29% - 0.29*17px); } 
+    th.C {width: calc(43% - 0.43*17px);}
+    td.C000000 { background-color: #000000; }
+
+
+</style>
+</head>
+
+<body>
+
+<div id="container">
+    <div id="bg">
+        <div id="frame">
+        </div>
+    </div>
+    <div id="dropzone">
+        <input type="file" id="input">
+        <span id="info">Paste or drop a picture here!</span>
+        <div id="droplogo">
+            <i></i>
+            <div id="borderlogo"></div>
+            <h3>
+        </div>
+    </div>
+</div>
+<div id="results">
+    <div id="paneltop">
+        <button onclick="save()" id="save">&#10004;&emsp;Save</button>
+        <button onclick="showStuff()" id="reset">&#10006;&emsp;Reset</button>
+    </div>
+    <input type="text" id="caption" placeholder="Name it!">
+    <div id="preview">
+    </div>
+    <div id="data">
+        <span><b>HEX</b></span><p id="HEX">000000</p>       <button onclick="copyToClipboard('HEX')">&#9999;</button>
+        <span><b>RGB</b></span><p id="RGB">  0,   0,   0</p><button onclick="copyToClipboard('RGB')">&#9999;</button>
+        <span><b>POS</b></span><p id="POS">   0,    0</p>   <button onclick="copyToClipboard('POS')">&#9999;</button>
+    </div>
+    <table>
+    <thead>
+        <tr><th class="C" colspan="2">Color</th><th class="A">X</th><th class="A">Y</th><th class="special">Capt</th></tr>
+    </thead>
+    <tbody>
+        <tr><td class="A C000000"> </td><td class="B">000000</td><td class="A">   0</td><td class="A">   0</td><td class="B">black</td></tr>
+    </tbody>
+    </table>
+
+</div>
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+(function($) {
+    $.event.fix = (function(originalFix) {
+        return function(event) {
+            event = originalFix.apply(this, arguments);
+            if (event.type.indexOf('copy') === 0 || event.type.indexOf('paste') === 0) {
+                event.clipboardData = event.originalEvent.clipboardData;
+            }
+            return event;
+        };
+    })($.event.fix);
+
+    return $.fn.pasteImageReader = function(options) {
+        options = { callback: options };
+        return this.each(function() {
+            var $this, element;
+            element = this;
+            $this = $(this);
+            return $this.bind('paste', function(event) {
+                var clipboardData, found;
+                found = false;
+                clipboardData = event.clipboardData;
+                return Array.prototype.forEach.call(clipboardData.types, function(type, i) {
+                    var file, reader;
+                    if (found) {
+                        return;
+                    }
+                    if (type.match(options.matchType) || clipboardData.items[i].type.match(options.matchType)) {
+                        file = clipboardData.items[i].getAsFile();
+                        reader = new FileReader();
+                        reader.onload = function(evt) {
+                            return options.callback.call(element, {
+                                dataURL: evt.target.result,
+                                event: evt,
+                                file: file,
+                                name: file.name
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                        return found = true;
+                    }
+                });
+            });
+        });
+    };
+})(jQuery);
+
+$("html").pasteImageReader(function(results) {
+    loadDataURL( results.dataURL );
+});
+
+function loadDataURL(dataURL) {
+    cst.dataURL = dataURL;
+    cst.img = document.createElement('img');
+    cst.img.src = cst.dataURL;
+
+    cst.img.onload=function() {
+        hideStuff();
+
+        cst.imgsize = [cst.img.width,cst.img.height];                   // Original IMG SIZE
+        cst.winsize = [cst.$cont.width(), cst.$cont.height()];          // Window size
+        cst.zoom = 1;                                                   // ZOOM
+        if (cst.winsize[0] > cst.imgsize[0]*cst.zoom && cst.winsize[1] > cst.imgsize[1]*cst.zoom) {
+            while (cst.winsize[0] > cst.imgsize[0]*cst.zoom && cst.winsize[1] > cst.imgsize[1]*cst.zoom) { cst.zoom *= 2; }
+            cst.zoom /= 2; }
+        cst.bgs = [cst.imgsize[0]*cst.zoom, cst.imgsize[1]*cst.zoom];   // Real IMG SIZE
+        cst.pos = [0,0];                                                // Background offset
+        cst.fpos = [0,0];                                               // Frame original position
+
+        cst.$bg.css({
+            "width" : cst.bgs[0]*128 + "px ",
+            "height": cst.bgs[1]*128 + "px ",
+            "backgroundImage": "url(" + cst.dataURL + ")",
+            "background-size": cst.bgs[0] + "px " + cst.bgs[1] + "px"   
+        });
+
+        // Loading all pixels data in imgData
+        var canvas = document.createElement('canvas');
+        canvas.id = "myCanvas", canvas.width = cst.imgsize[0], canvas.height = cst.imgsize[1];
+        document.body.appendChild(canvas);
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(cst.img, 0, 0);
+        cst.imgData = ctx.getImageData(0, 0, cst.img.width, cst.img.height).data;
+        $("#myCanvas").remove();
+
+        // Sets the background draggable
+        cst.$bg.draggable({
+            containment: [  -cst.bgs[0]+cst.winsize[0]/2,  -cst.bgs[1]+cst.winsize[1]/2, cst.winsize[0]/2, cst.winsize[1]/2 ]
+        });
+
+        // Pixels can be selected and shown with this
+        cst.$bg.click(function(e) {
+            cst.fpos = [ parseInt((e.pageX - cst.$bg.offset().left)/cst.zoom), parseInt((e.pageY - cst.$bg.offset().top)/cst.zoom) ];
+            cst.pos = [cst.$bg.offset().left, cst.$bg.offset().top];
+            UpdateFrame(true);
+        });
+
+        // Zooming
+        cst.$cont.bind('mousewheel', function(e) {
+            var x = e.pageX; var y = e.pageY;
+            cst.pos = [cst.$bg.offset().left, cst.$bg.offset().top];
+            if(e.originalEvent.wheelDelta / 120 > 0) {
+                if (cst.zoom < 128) {
+                    cst.zoom *= 2;
+                    if (cst.zoom > 1) { cst.zoom = Math.round(cst.zoom); }
+                    cst.bgs[0] *= 2; cst.bgs[1] *= 2;
+                    cst.pos[0] = (cst.pos[0] - x)*2 + x;
+                    cst.pos[1] = (cst.pos[1] - y)*2 + y;
+                }
+            } else {
+                if (cst.winsize[0] < cst.bgs[0] || cst.winsize[1] < cst.bgs[1]) {
+                    cst.zoom /= 2;
+                    cst.bgs[0] /= 2; cst.bgs[1] /= 2;
+                    cst.pos[0] = (cst.pos[0] - x)/2 + x;
+                    cst.pos[1] = (cst.pos[1] - y)/2 + y;
+                }
+            } UpdateBgpos(true);UpdateFrame();
+        });
+
+        // Small adjustments
+        document.onkeydown = function(e) {
+            switch (e.keyCode) {
+                case 37: cst.fpos[0] -= 1;UpdateFrame(true);break;
+                case 38: cst.fpos[1] -= 1;UpdateFrame(true);break;
+                case 39: cst.fpos[0] += 1;UpdateFrame(true);break;
+                case 40: cst.fpos[1] += 1;UpdateFrame(true);break;
+            }
+        };
+    }
+}
+
+function hideStuff() {
+    cst.$info.hide();cst.$i.hide();cst.$drophere.hide();cst.$border.hide();cst.$input.hide();
+}
+
+function showStuff() {
+    cst.$info.show();cst.$i.show();cst.$drophere.show();cst.$border.show();cst.$input.show();cst.$frame.hide();
+    cst.$bg.css({ "backgroundImage": "none", "height": 0, "width": 0, "top": 0, "left": 0})
+}
+
+function UpdateFrame(newPixel = false) {
+    if      (cst.fpos[0] < 0)               { cst.fpos[0] = 0; }
+    else if (cst.fpos[0] >= cst.imgsize[0]) { cst.fpos[0] = cst.imgsize[0]-1; } 
+    else if (cst.fpos[1] < 0)               { cst.fpos[1] = 0; } 
+    else if (cst.fpos[1] >= cst.imgsize[1]) { cst.fpos[1] = cst.imgsize[1]-1; }
+    if ( ( cst.fpos[0] >= parseInt( -cst.pos[0]/cst.zoom) && cst.fpos[0] <= parseInt((-cst.pos[0]+cst.winsize[0])/cst.zoom) )
+    &&   ( cst.fpos[1] >= parseInt( -cst.pos[1]/cst.zoom) && cst.fpos[1] <= parseInt((-cst.pos[1]+cst.winsize[1])/cst.zoom) )
+    && cst.zoom >= 16 ) {
+        cst.$frame.show()
+        cst.pos = [cst.$bg.offset().left, cst.$bg.offset().top];
+        if      (cst.fpos[0] == parseInt( -cst.pos[0]/cst.zoom))                 { cst.pos[0] += cst.zoom;UpdateBgpos(); } 
+        else if (cst.fpos[0] == parseInt((-cst.pos[0]+cst.winsize[0])/cst.zoom)) { cst.pos[0] -= cst.zoom;UpdateBgpos(); }
+        else if (cst.fpos[1] == parseInt( -cst.pos[1]/cst.zoom))                 { cst.pos[1] += cst.zoom;UpdateBgpos(); }
+        else if (cst.fpos[1] == parseInt((-cst.pos[1]+cst.winsize[1])/cst.zoom)) { cst.pos[1] -= cst.zoom;UpdateBgpos(); }
+        var i = (cst.fpos[1]*cst.imgsize[0] + cst.fpos[0])*4;
+        cst.$frame.css({
+            width:  cst.zoom*7/8,
+            height: cst.zoom*7/8,
+            border: cst.zoom/16+"px dashed black",
+            left: cst.fpos[0]*cst.zoom,
+            top:  cst.fpos[1]*cst.zoom });
+        if (cst.imgData[i] + cst.imgData[i+1] + cst.imgData[i+2] < 100) { cst.$frame.css({ "border-color": "gray" }); }
+        if (newPixel) { UpdateResults( cst.imgData[i], cst.imgData[i+1], cst.imgData[i+2] ) }
+    } else { cst.$frame.hide() }
+}
+
+function UpdateResults(red, green, blue) {
+    cst.$preview.css({ "background-color": "rgb("+red+","+green+","+blue+")" });
+    var hex = "", t;
+    t = parseInt(red).toString(16);
+    hex += (t.length==1) ? "0"+t : t;
+    t = parseInt(green).toString(16);
+    hex += (t.length==1) ? "0"+t : t;
+    t = parseInt(blue).toString(16);
+    hex += (t.length==1) ? "0"+t : t;
+    cst.$HEX.text( hex );
+    red = ('   ' + red).slice(-3);
+    green = ('   ' + green).slice(-3);
+    blue = ('   ' + blue).slice(-3);
+    cst.$RGB.text( red + ", " + green + ", " + blue );
+    var x = ('   ' + cst.fpos[0]).slice(-4);
+    var y = ('   ' + cst.fpos[1]).slice(-4);   
+    cst.$POS.text( x + ", " + y );
+    console.log()
+}
+
+function UpdateBgpos(resized = false) {
+    if ( cst.pos[0] > cst.winsize[0]/2 ) {
+        cst.pos[0] = cst.winsize[0]/2;
+    } else if ( cst.pos[0] < -cst.bgs[0]+cst.winsize[0]/2 ) {
+        cst.pos[0] = -cst.bgs[0]+cst.winsize[0]/2;
+    } if ( cst.pos[1] > cst.winsize[1]/2 ) {
+        cst.pos[1] = cst.winsize[1]/2;
+    } else if ( cst.pos[1] < -cst.bgs[1]+cst.winsize[1]/2 ) {
+        cst.pos[1] = -cst.bgs[1]+cst.winsize[1]/2; }
+    cst.$bg.css({
+        "top":  cst.pos[1],
+        "left": cst.pos[0] });
+    if (resized) {
+        cst.$bg.draggable( "option", "containment", [  -cst.bgs[0]+cst.winsize[0]/2,  -cst.bgs[1]+cst.winsize[1]/2, cst.winsize[0]/2, cst.winsize[1]/2 ] );
+        cst.$bg.css({ "background-size"    :  cst.bgs[0] + "px " +  cst.bgs[1] + "px" }); }
+}
+
+var cst = {};
+cst.$body = $('body')
+cst.$cont = $('#container');cst.$bg = $('#bg');cst.$frame = $('#frame');cst.$input = $('#input');
+cst.$info = $('#info');cst.$i = $('i');cst.$drophere = $('#droplogo');cst.$border = $('#borderlogo');
+cst.$results = $('#results');cst.$preview = $('#preview');cst.$caption = $('#caption');
+cst.$HEX = $('#HEX');cst.$RGB = $('#RGB');cst.$POS = $('#POS');
+cst.$cont.css({ "height": cst.$cont.outerHeight(true) });cst.$frame.hide();
+
+var imageLoader = document.getElementById('input');imageLoader.addEventListener('change', handleImage, false);
+function handleImage(e) {
+    var reader = new FileReader();
+    reader.onload = function (event) {
+        loadDataURL( event.target.result );
+    }
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+function save() {
+    var hex = cst.$HEX.text();
+    var pos = cst.$POS.text().split(", ");
+    var x = pos[0];
+    var y = pos[1];
+    var caption = cst.$caption.val();
+    console.log(hex,x,y,caption);
+    $('table > tbody:last-child').append('<tr><td class="A C'+hex+'"> </td><td class="B">'+hex+'</td><td class="A">'+x
+        +'</td><td class="A">'+y+'</td><td class="B">'+caption+'</td></tr>');
+    $(".C" + hex).css( {'background-color': "#"+hex } );
+}
+
+function copyToClipboard(id) {
+    var element = document.getElementById(id);
+    var $temp = $("<input>");
+    cst.$body.append($temp);
+    $temp.val($(element).text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+}
+</script>
+</body>
+</html>
